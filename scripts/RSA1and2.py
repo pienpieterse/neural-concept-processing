@@ -17,7 +17,6 @@ from scipy.stats import spearmanr
 
 from utils import tools, RSA
 
-
 def main():
     ctrlAV = [12, 13, 14, 15, 16, 17, 18, 19, 22, 32]
     ctrlA = [3, 4, 5, 6, 7, 8, 9, 10, 11, 27]
@@ -78,7 +77,7 @@ def main():
 
     storing_results = "results"
 
-    RSA.RSA_fmri(groups, roi_masks, models, storing_results)
+    RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 
 
 
