@@ -1,0 +1,8 @@
+# Ignore Python basics
+__pycache__/
+*.pyc
+
+*.nii.gz
+
+# Ignore environment files
+.venv
