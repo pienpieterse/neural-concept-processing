@@ -73,20 +73,6 @@ def split_runs(data, indices, spliti):
 
     return runs
 
-def first_order_similarity(fmri):
-    L2a = []  # List to store fMRI correlations
-
-    num_timepoints = fmri.shape[0]
-
-    for t1 in range(num_timepoints):
-        for t2 in range(t1 + 1, num_timepoints):  # Upper-triangular matrix only (t2 > t1)
-            
-            # fMRI correlation: Compute correlation between voxel activity at t1 and t2
-            fmri_corr = spearmanr(fmri[t1, :], fmri[t2, :]).correlation
-            L2a.append(fmri_corr)
-
-    return L2a
-
 def mask_fmri_data(fmri_img, original_mask, roi=None):
     if roi=="body" or roi=="object" or roi=="scene" or roi=="face":
         mask_data = original_mask.get_fdata()
@@ -214,42 +200,71 @@ def load_and_split_trimmed(path_or_array, run_start_indices, trim_start=3, trim_
     trimmed_runs = [runs[0][trim_start + 1 : -trim_end]] + [r[trim_start:-trim_end] for r in runs[1:]]
     return trimmed_runs
 
-def model_correlations(model_corr_path = None, newcorrelations = False, models = {}):
-    if os.path.exists(model_corr_path) and newcorrelations is False:
+
+def first_order_similarity(fmri):
+    """
+    Compute upper-triangle similarity of fMRI data (timepoints x voxels)
+    using Spearman correlation.
+    
+    Returns flattened upper-triangle vector (length T*(T-1)/2)
+    """
+    T = fmri.shape[0]
+    sim_vector = []
+    for t1 in range(T):
+        for t2 in range(t1 + 1, T):
+            corr = spearmanr(fmri[t1, :], fmri[t2, :]).correlation
+            sim_vector.append(corr)
+    return np.array(sim_vector)
+
+
+def model_correlations(models, storing_results="results", recompute=False):
+    """
+    Compute or load first-order similarity matrices for each model and run.
+    Handles both 1D (vector) and 2D (matrix) models.
+    """
+    model_corr_path = os.path.join(storing_results, "model_correlations.pkl")
+
+    if os.path.exists(model_corr_path) and not recompute:
         print("Loading existing model correlations")
         with open(model_corr_path, 'rb') as f:
-            model_correlations = pickle.load(f)
+            model_corrs = pickle.load(f)
+        return model_corrs
 
-        return model_correlations
-    else:
-        print("Computing model correlations")
-        model_correlations = {}
+    print("Computing model correlations for...")
+    model_corrs = {}
+    for model_name, model_list in models.items():
+        print(f"\t{model_name}")
+        per_run = []
+        for run_data in model_list:
+            if run_data.ndim == 1:
+                # 1D model: negative absolute distance
+                T = len(run_data)
+                sim_vector = [-abs(run_data[t1] - run_data[t2]) 
+                              for t1 in range(T) for t2 in range(t1+1, T)]
+                per_run.append(np.array(sim_vector))
+            else:
+                # 2D model: use first_order_similarity
+                per_run.append(first_order_similarity(run_data))
+        model_corrs[model_name] = per_run
 
-        for model_name, model_list in models.items():
-            per_run = []
+    os.makedirs(storing_results, exist_ok=True)
+    with open(model_corr_path, 'wb') as f:
+        pickle.dump(model_corrs, f)
 
-            for i in range(len(model_list)):
-                test_model = model_list[i]
-                L2b = []
+    return model_corrs
 
-                num_timepoints = test_model.shape[0]
-
-                for t1 in range(num_timepoints):
-                    for t2 in range(t1 + 1, num_timepoints):
-                        if test_model.ndim == 1:
-                            # 1D: Use negative absolute distance
-                            dist = -abs(test_model[t1] - test_model[t2])
-                            L2b.append(dist)
-                        else:
-                            # 2D: Use Spearman correlation
-                            corr = spearmanr(test_model[t1, :], test_model[t2, :]).correlation
-                            L2b.append(corr)
-
-                per_run.append(L2b)
-
-            model_correlations[model_name] = per_run
-
-        with open(model_corr_path, 'wb') as f:
-            pickle.dump(model_correlations, f)
-
-        return model_correlations
+def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
+    """
+    Compute second-order RSA per timepoint.
+    
+    fmri_corr_vec and model_corr_vec are flattened upper-triangle vectors
+    of shape (T*(T-1)/2,)
+    """
+    timepoint_corrs = np.zeros(T)
+    # Precompute the indices of upper-triangle for each timepoint
+    pair_idx = np.triu_indices(T, k=1)
+    for t in range(T):
+        # Select pairs involving timepoint t
+        mask = (pair_idx[0] == t) | (pair_idx[1] == t)
+        timepoint_corrs[t] = spearmanr(fmri_corr_vec[mask], model_corr_vec[mask]).correlation
+    return timepoint_corrs
