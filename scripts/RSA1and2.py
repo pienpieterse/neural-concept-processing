@@ -44,7 +44,8 @@ def main():
     run_start_indices =[0, 267, 492, 812, 1137, 1373]
 
     base_dirs = [
-    "data/LLM embeddings/used LLM embeddings"
+    #"data/LLM embeddings/used LLM embeddings"
+    "data/LLM embeddings/additional"
     ]
 
     # Dictionary to store all L1 similarity scores of the models
@@ -75,7 +76,7 @@ def main():
         run_start_indices
     )
 
-    storing_results = "results"
+    storing_results = "results/additional"
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 

@@ -201,20 +201,20 @@ def load_and_split_trimmed(path_or_array, run_start_indices, trim_start=3, trim_
     return trimmed_runs
 
 
-def first_order_similarity(fmri):
-    """
-    Compute upper-triangle similarity of fMRI data (timepoints x voxels)
-    using Spearman correlation.
+# def first_order_similarity(fmri):
+#     """
+#     Compute upper-triangle similarity of fMRI data (timepoints x voxels)
+#     using Spearman correlation.
     
-    Returns flattened upper-triangle vector (length T*(T-1)/2)
-    """
-    T = fmri.shape[0]
-    sim_vector = []
-    for t1 in range(T):
-        for t2 in range(t1 + 1, T):
-            corr = spearmanr(fmri[t1, :], fmri[t2, :]).correlation
-            sim_vector.append(corr)
-    return np.array(sim_vector)
+#     Returns flattened upper-triangle vector (length T*(T-1)/2)
+#     """
+#     T = fmri.shape[0]
+#     sim_vector = []
+#     for t1 in range(T):
+#         for t2 in range(t1 + 1, T):
+#             corr = spearmanr(fmri[t1, :], fmri[t2, :]).correlation
+#             sim_vector.append(corr)
+#     return np.array(sim_vector)
 
 
 def model_correlations(models, storing_results="results", recompute=False):
@@ -253,18 +253,99 @@ def model_correlations(models, storing_results="results", recompute=False):
 
     return model_corrs
 
+# def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
+#     """
+#     Compute second-order RSA per timepoint.
+    
+#     fmri_corr_vec and model_corr_vec are flattened upper-triangle vectors
+#     of shape (T*(T-1)/2,)
+#     """
+#     timepoint_corrs = np.zeros(T)
+#     # Precompute the indices of upper-triangle for each timepoint
+#     pair_idx = np.triu_indices(T, k=1)
+#     for t in range(T):
+#         # Select pairs involving timepoint t
+#         mask = (pair_idx[0] == t) | (pair_idx[1] == t)
+#         timepoint_corrs[t] = spearmanr(fmri_corr_vec[mask], model_corr_vec[mask]).correlation
+#     return timepoint_corrs
+
+from scipy.stats import spearmanr
+import numpy as np
+
+def first_order_similarity(arr):
+    """
+    Compute upper-triangle Spearman correlations between rows of arr.
+    If any row in a pair is constant, correlation is set to nan.
+    
+    Parameters
+    ----------
+    arr : array, shape (T, features)
+        Time-by-feature matrix.
+
+    Returns
+    -------
+    corr_vector : 1D array
+        Vector of pairwise correlations (length T*(T-1)/2).
+    """
+
+    T = arr.shape[0]
+    sim_vector = []
+
+    for t1 in range(T):
+        row1 = arr[t1]
+        std1 = np.std(row1)
+
+        for t2 in range(t1 + 1, T):
+            row2 = arr[t2]
+            std2 = np.std(row2)
+
+            # Check for constant input arrays
+            if std1 == 0 or std2 == 0:
+                sim_vector.append(np.nan)
+                continue
+
+            # Compute Spearman
+            corr = spearmanr(row1, row2, nan_policy="omit").correlation
+            sim_vector.append(corr)
+
+    return np.array(sim_vector)
+
+
+
+def safe_corr(a, b):
+    """
+    Compute Spearman correlation while ignoring NaNs.
+    
+    Returns nan if less than 2 valid points remain.
+    """
+    mask = ~np.isnan(a) & ~np.isnan(b)
+    if mask.sum() < 2:
+        return np.nan
+    return spearmanr(a[mask], b[mask]).correlation
+
+
 def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
     """
     Compute second-order RSA per timepoint.
     
     fmri_corr_vec and model_corr_vec are flattened upper-triangle vectors
     of shape (T*(T-1)/2,)
+    
+    Returns
+    -------
+    timepoint_corrs : array, shape (T,)
+        Spearman correlation for each timepoint. NaN if not enough valid pairs.
     """
     timepoint_corrs = np.zeros(T)
+    
     # Precompute the indices of upper-triangle for each timepoint
     pair_idx = np.triu_indices(T, k=1)
+    
     for t in range(T):
         # Select pairs involving timepoint t
         mask = (pair_idx[0] == t) | (pair_idx[1] == t)
-        timepoint_corrs[t] = spearmanr(fmri_corr_vec[mask], model_corr_vec[mask]).correlation
+        
+        # Compute correlation safely
+        timepoint_corrs[t] = safe_corr(fmri_corr_vec[mask], model_corr_vec[mask])
+    
     return timepoint_corrs
