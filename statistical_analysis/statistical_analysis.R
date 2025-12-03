@@ -14,7 +14,7 @@ df <- read.csv("results/results.csv", row.names=NULL)
 
 df <- df %>%
   separate(
-    group.participant.roi.roi_type.model.index.value.semantic_model.semantic_value,
+    participant_group.participant.roi.roi_type.model.index.value.semantic_model.semantic_value,
     into = c("group", "participant", "roi", "roi_type", "model", "index", "value",
              "semantic_model", "semantic_value"),
     sep = ";",
@@ -31,7 +31,7 @@ df$value <- as.numeric(as.character(df$value))
 head(df)
 
 #QUESTION 1: 
-df1 <- df %>%
+df1 <- df %>% 
   filter(grepl("binder_concreteness|binder_abstractness", model))
 
 head(df1)
@@ -90,19 +90,18 @@ p_final <- p_raw | p_pred
 p_final
 
 
-#QUESTION 2 (4)
+#QUESTION 2
 
-%%% andrea suggestion 1
-\begin{align*}
-\text{fMRI-foundation model alignment at timepoint t} \sim\ & \text{participant group} + \text{roi type} + \text{foundation model modality} \times \text{concreteness at timepoint t} + \text{foundation model modality} \times \text{abstractness at timepoint t} + (1 \mid \text{participant}) + (1 \mid \text{foundation model}) + (1 \mid \text{run where timepoint t is found})\\
-& + (1 \mid \text{roi})
-% i suggest to add runs as random effects because voxels are selected differently for each run
-\end{align*}
+df2 <- df %>% 
+  filter(!grepl("binder_concreteness|binder_abstractness", model))
 
+head(df2)
 
-
-%%% andrea suggestion 2
+#andrea suggestion 2
 \begin{align*}
 \text{fMRI-foundation model alignment at timepoint t} \sim\ & \text{participant group} + \text{roi type} + \text{foundation model} \times \text{concreteness at timepoint t} + \text{foundation model} \times \text{abstractness at timepoint t} + (1 \mid \text{participant})  + (1 \mid \text{run where timepoint t is found})\\
 & + (1 \mid \text{roi})
 \end{align*}
+
+model2 <- lmer(value ~ group * model * roi_type + (1 | participant) + (1 | roi), data = df2)
+summary(model1)
