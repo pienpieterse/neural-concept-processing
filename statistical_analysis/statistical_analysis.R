@@ -14,8 +14,8 @@ df <- read.csv("results/results.csv", row.names=NULL)
 
 df <- df %>%
   separate(
-    participant_group.participant.roi.roi_type.model.index.value.semantic_model.semantic_value,
-    into = c("group", "participant", "roi", "roi_type", "model", "index", "value",
+    index.model.value.participant.roi.roi_type.participant_group.concreteness.abstractness.run,
+    into = c("index","model","value","participant", "roi", "roi_type", "participant_group", "concreteness", "abstractness", "run",
              "semantic_model", "semantic_value"),
     sep = ";",
     convert = TRUE
@@ -27,6 +27,8 @@ df$group <- as.factor(df$group)
 df$model <- as.factor(df$model)
 df$participant <- as.factor(df$participant)
 df$value <- as.numeric(as.character(df$value))
+df$concreteness <- as.numeric(as.character(df$concreteness))
+df$abstractness <- as.numeric(as.character(df$abstractness))
 
 head(df)
 
@@ -36,9 +38,16 @@ df1 <- df %>%
 
 head(df1)
 
+model1 <- lmer(
+  value ~ participant_group * model * roi_type +
+  (1 | participant) +
+  (1 | roi) +
+  (1 | run),
+  data = df1
+)
 
-model1 <- lmer(value ~ group * model * roi_type + (1 | participant) + (1 | roi), data = df1)
 summary(model1)  
+anova(model1)
 
 emm <- emmeans(model1, ~ roi_type * model)
 emm
@@ -97,11 +106,13 @@ df2 <- df %>%
 
 head(df2)
 
-#andrea suggestion 2
-\begin{align*}
-\text{fMRI-foundation model alignment at timepoint t} \sim\ & \text{participant group} + \text{roi type} + \text{foundation model} \times \text{concreteness at timepoint t} + \text{foundation model} \times \text{abstractness at timepoint t} + (1 \mid \text{participant})  + (1 \mid \text{run where timepoint t is found})\\
-& + (1 \mid \text{roi})
-\end{align*}
-
-model2 <- lmer(value ~ group * model * roi_type + (1 | participant) + (1 | roi), data = df2)
-summary(model1)
+model2 <- lmer(
+  value ~ participant_group +
+  roi_type +
+  model * concreteness +
+  model  abstractness +
+  (1 | participant) +
+  (1 | run ) +
+  (1 | roi),
+  data = df2
+)
