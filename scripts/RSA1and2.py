@@ -76,7 +76,7 @@ def main():
         run_start_indices
     )
 
-    storing_results = "results/additional"
+    storing_results = "results"
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 

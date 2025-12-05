@@ -12,4 +12,4 @@ uv run -m scripts.RSA1and2
 ```
 
 to the the results:
-run the results/clean_up_results.ipynb notebook
+run get results/clean_up_results.ipynb notebook

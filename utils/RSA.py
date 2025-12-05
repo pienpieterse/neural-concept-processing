@@ -89,10 +89,10 @@ def RSA_fmri(groups: dict, roi_masks: dict, models: dict, storing_results: str, 
                     results_dict[participant_id][roi][model_name] = np.concatenate(L1)  # shape: (runs, T)
                     best_voxels_dict[participant_id][roi][model_name] = BV
 
-        results_path = storing_results+f'/results_{participantgroup}.pkl'
-        best_voxels_path = storing_results+f'/best_voxels_{participantgroup}.pkl'
+        results_path = storing_results+f'/results.pkl'
+        best_voxels_path = storing_results+f'/best_voxels.pkl'
 
-        # Save results_dict
+        # Save results_dict and saving for each participant group in the meantime
         with open(results_path, 'wb') as f:
             pickle.dump(dict(results_dict), f)
 
