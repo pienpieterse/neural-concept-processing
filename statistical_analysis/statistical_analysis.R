@@ -110,7 +110,7 @@ model2 <- lmer(
   value ~ participant_group +
   roi_type +
   model * concreteness +
-  model  abstractness +
+  model * abstractness +
   (1 | participant) +
   (1 | run ) +
   (1 | roi),
