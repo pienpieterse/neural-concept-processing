@@ -11,5 +11,5 @@ to run the RSA scripts, e.g.
 uv run -m scripts.RSA1and2
 ```
 
-to the the results:
+to get the results:
 run get results/clean_up_results.ipynb notebook

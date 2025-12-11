@@ -230,28 +230,28 @@ def model_correlations(models, storing_results="results", recompute=False):
             model_corrs = pickle.load(f)
         return model_corrs
 
-    print("Computing model correlations for...")
-    model_corrs = {}
-    for model_name, model_list in models.items():
-        print(f"\t{model_name}")
-        per_run = []
-        for run_data in model_list:
-            if run_data.ndim == 1:
-                # 1D model: negative absolute distance
-                T = len(run_data)
-                sim_vector = [-abs(run_data[t1] - run_data[t2]) 
-                              for t1 in range(T) for t2 in range(t1+1, T)]
-                per_run.append(np.array(sim_vector))
-            else:
-                # 2D model: use first_order_similarity
-                per_run.append(first_order_similarity(run_data))
-        model_corrs[model_name] = per_run
+    else:
+        model_corrs = {}
+        for model_name, model_list in models.items():
+            print(f"\t{model_name}")
+            per_run = []
+            for run_data in model_list:
+                if run_data.ndim == 1:
+                    # 1D model: negative absolute distance
+                    T = len(run_data)
+                    sim_vector = [-abs(run_data[t1] - run_data[t2]) 
+                                for t1 in range(T) for t2 in range(t1+1, T)]
+                    per_run.append(np.array(sim_vector))
+                else:
+                    # 2D model: use first_order_similarity
+                    per_run.append(first_order_similarity(run_data))
+            model_corrs[model_name] = per_run
 
-    os.makedirs(storing_results, exist_ok=True)
-    with open(model_corr_path, 'wb') as f:
-        pickle.dump(model_corrs, f)
+        os.makedirs(storing_results, exist_ok=True)
+        with open(model_corr_path, 'wb') as f:
+            pickle.dump(model_corrs, f)
 
-    return model_corrs
+        return model_corrs
 
 # def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
 #     """

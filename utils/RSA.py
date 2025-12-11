@@ -17,7 +17,7 @@ from scipy.stats import spearmanr
 
 from utils import tools
 
-def RSA_fmri(groups: dict, roi_masks: dict, models: dict, storing_results: str, run_start_indices: list = [0, 267, 492, 812, 1137, 1373], recompute_model_correlations: bool = False):
+def RSA_fmri(groups: dict, roi_masks: dict, models: dict, storing_results: str, recompute_model_correlations: bool, run_start_indices: list = [0, 267, 492, 812, 1137, 1373]):
     """
     Perform cross-validated RSA on fMRI data per participant, ROI, model.
     Returns:
@@ -25,7 +25,7 @@ def RSA_fmri(groups: dict, roi_masks: dict, models: dict, storing_results: str, 
         best_voxels_dict: selected voxel indices per run
     """
     # Precompute model correlations
-    model_corrs = tools.model_correlations(models=models, recompute=recompute_model_correlations)
+    model_corrs = tools.model_correlations(models=models, storing_results=storing_results, recompute=recompute_model_correlations)
 
     # Load low-level models
     acoustic_full = np.hstack([

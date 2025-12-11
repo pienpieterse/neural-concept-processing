@@ -26,11 +26,11 @@ def main():
             ,'ctrlA': ctrlA
             ,'ctrlAV': ctrlAV}
     
-    language_mask = nib.load("/Volumes/SSD-1TB/UU - thesis/ROIs/allParcels-language-SN220.nii")
-    scene_mask = nib.load("/Volumes/SSD-1TB/UU - thesis/ROIs/ventralparcels/cvs_scene_parcels/fROIs-fwhm_5-0.0001.nii")
-    body_mask = nib.load("/Volumes/SSD-1TB/UU - thesis/ROIs/ventralparcels/cvs_body_parcels/fROIs-fwhm_5-0.0001.nii")
-    object_mask = nib.load("/Volumes/SSD-1TB/UU - thesis/ROIs/ventralparcels/cvs_object_parcels/fROIs-fwhm_5-0.0001.nii")
-    face_mask = nib.load("/Volumes/SSD-1TB/UU - thesis/ROIs/ventralparcels/cvs_face_parcels/fROIs-fwhm_5-0.0001.nii")
+    language_mask = nib.load("data/ROI masks/allParcels-language-SN220.nii")
+    scene_mask = nib.load("data/ROI masks/ventralparcels/cvs_scene_parcels/fROIs-fwhm_5-0.0001.nii")
+    body_mask = nib.load("data/ROI masks/ventralparcels/cvs_body_parcels/fROIs-fwhm_5-0.0001.nii")
+    object_mask = nib.load("data/ROI masks/ventralparcels/cvs_object_parcels/fROIs-fwhm_5-0.0001.nii")
+    face_mask = nib.load("data/ROI masks/ventralparcels/cvs_face_parcels/fROIs-fwhm_5-0.0001.nii")
 
     # Create dictionary
     roi_masks = {
@@ -45,13 +45,12 @@ def main():
 
     base_dirs = [
     #"data/LLM embeddings/used LLM embeddings"
-    "data/LLM embeddings/additional"
     ]
 
     # Dictionary to store all L1 similarity scores of the models
     models = {}
 
-    # --- Process the renamed LLM model files ---
+    # --- Process the LLM model files ---
     for base_dir in base_dirs:
         for file in os.listdir(base_dir):
             if file.endswith(".txt") and ("embedding+" in file or "layers" in file):
@@ -66,17 +65,23 @@ def main():
                 except Exception as e:
                     print(f"Error loading {file_path}: {e}")
 
-    models["binder_abstractness"] = tools.load_and_split_trimmed(
-        "/Volumes/SSD-1TB/UU - thesis/fMRI data/conv_models_1614/binder_abstractness_conv.1D",
+    # models["binder_abstractness"] = tools.load_and_split_trimmed(
+    #     "/Volumes/SSD-1TB/UU - thesis/fMRI data/conv_models_1614/binder_abstractness_conv.1D",
+    #     run_start_indices
+    # )
+
+    # models["binder_concreteness"] = tools.load_and_split_trimmed(
+    #     "/Volumes/SSD-1TB/UU - thesis/fMRI data/conv_models_1614/binder_concreteness_conv.1D",
+    #     run_start_indices
+    # )
+
+    models["word2vec"] = tools.load_and_split_trimmed(
+        "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
         run_start_indices
     )
 
-    models["binder_concreteness"] = tools.load_and_split_trimmed(
-        "/Volumes/SSD-1TB/UU - thesis/fMRI data/conv_models_1614/binder_concreteness_conv.1D",
-        run_start_indices
-    )
-
-    storing_results = "results"
+    #path to where the results are stored
+    storing_results = "results/word2vec"
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 
