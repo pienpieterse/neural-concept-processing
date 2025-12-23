@@ -98,6 +98,13 @@ def mask_fmri_data(fmri_img, original_mask, roi=None):
         # Apply the mask
         masker = NiftiMasker(mask_img=mask_resampled)
         masked_data = masker.fit_transform(fmri_img)
+    elif roi=="visual":
+        mask_img = math_img(f"img == 1", img=original_mask)
+        mask_resampled = resample_to_img(mask_img, fmri_img, interpolation="nearest", force_resample=True, copy_header=True)
+
+        # Apply mask
+        masker = NiftiMasker(mask_img=mask_resampled)
+        masked_data = masker.fit_transform(fmri_img)
     elif roi==2:
         mask_img = math_img("np.logical_or(img == 1, img == 2)", img=original_mask)
         mask_resampled = resample_to_img(mask_img, fmri_img, interpolation="nearest", force_resample=True, copy_header=True)

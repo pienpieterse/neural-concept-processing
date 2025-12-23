@@ -2,10 +2,19 @@
 __pycache__/
 *.pyc
 
-*.nii.gz
-
 # Ignore environment files
 .venv
 .Rproj.user
 
+
+# Ignore all (unused) models
+data/LLM embeddings/all LLM embeddings
+data/semantic models/old
+data/ROI masks/ventralparcels
+
+# Ignore large results csv
 **.csv
+
+#Ignore fmri data (these can be found in the Setti dataset)
+*.nii.gz
+
