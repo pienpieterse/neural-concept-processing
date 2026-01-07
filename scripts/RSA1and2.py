@@ -52,20 +52,47 @@ def main():
     # Dictionary to store all L1 similarity scores of the models
     models = {}
 
+
+#THIS IS THE ORIGINAL CODE I USED TO LOOP OVER AND LOAD THE MODELS
     # --- Process the LLM model files ---
+    # for base_dir in base_dirs:
+    #     for file in os.listdir(base_dir):
+    #         if file.endswith((".txt", ".1D")):
+    #             file_path = os.path.join(base_dir, file)
+    #             print(f"Processing: {file_path}")
+
+    #             try:
+    #                 data = tools.load_and_split_trimmed(file_path, run_start_indices)
+    #                 model_label = os.path.splitext(file)[0]
+    #                 models[model_label] = data
+    #                 print(f"Loaded: {model_label}")
+    #             except Exception as e:
+    #                 print(f"Error loading {file_path}: {e}")
+
+
+#THIS IS THE NEW CODE I AM USING THE LOAD THE MODELS, WHICH NOW INCLUDED A SECOND EXCEPTION AND USES THE READ_MODEL FUNCTION ANDREA SENT
     for base_dir in base_dirs:
         for file in os.listdir(base_dir):
             if file.endswith((".txt", ".1D")):
                 file_path = os.path.join(base_dir, file)
+                model_label = os.path.splitext(file)[0]
+
                 print(f"Processing: {file_path}")
 
                 try:
                     data = tools.load_and_split_trimmed(file_path, run_start_indices)
-                    model_label = os.path.splitext(file)[0]
-                    models[model_label] = data
-                    print(f"Loaded: {model_label}")
-                except Exception as e:
-                    print(f"Error loading {file_path}: {e}")
+                    print(f"Loaded with load_and_split_trimmed: {model_label}")
+                except Exception as e1:
+                    print(f"Primary loader failed for {model_label}: {type(e1).__name__}")
+                    try:
+                        data = tools.read_model(file_path)
+                        print(f"Loaded with read_model: {model_label}")
+                    except Exception as e2:
+                        print(f"Fallback loader also failed for {model_label}: {type(e2).__name__}")
+                        continue  # skip this file entirely
+
+                models[model_label] = data
+
 
     models["binder_abstractness"] = tools.load_and_split_trimmed(
         "data/semantic models/binder-abstractness-contextualized_conv.1D",

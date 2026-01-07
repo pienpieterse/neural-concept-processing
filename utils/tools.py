@@ -356,3 +356,25 @@ def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
         timepoint_corrs[t] = safe_corr(fmri_corr_vec[mask], model_corr_vec[mask])
     
     return timepoint_corrs
+
+def read_model(filepath):
+
+    with open(filepath) as i:
+        vecs = list()
+        for l in i:
+            line = vecs.append(l.strip().split('\t'))
+        vecs = np.array(vecs, dtype=np.float64)
+        assert line.shape == (1614, 2048)
+    return vecs
+
+# def read_model(filepath):
+#     with open(filepath) as f:
+#         vecs = []
+#         for l in f:
+#             vecs.append(l.strip().split('\t'))
+
+#     vecs = np.array(vecs, dtype=np.float64)
+
+#     assert vecs.shape == (1614, 2048), f"Unexpected shape: {vecs.shape}"
+
+#     return vecs
