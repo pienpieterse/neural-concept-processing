@@ -27,10 +27,6 @@ def main():
             ,'ctrlAV': ctrlAV}
     
     language_mask = nib.load("data/ROI masks/allParcels-language-SN220.nii")
-    # scene_mask = nib.load("data/ROI masks/ventralparcels/cvs_scene_parcels/fROIs-fwhm_5-0.0001.nii")
-    # body_mask = nib.load("data/ROI masks/ventralparcels/cvs_body_parcels/fROIs-fwhm_5-0.0001.nii")
-    # object_mask = nib.load("data/ROI masks/ventralparcels/cvs_object_parcels/fROIs-fwhm_5-0.0001.nii")
-    # face_mask = nib.load("data/ROI masks/ventralparcels/cvs_face_parcels/fROIs-fwhm_5-0.0001.nii")
     visual_mask = nib.load("data/ROI masks/both_vision-areas-full_mask.nii")
 
     # Create dictionary
@@ -46,31 +42,12 @@ def main():
     run_start_indices =[0, 267, 492, 812, 1137, 1373]
 
     base_dirs = [
-    "data/LLM embeddings/used LLM embeddings"
+    "data/LLM embeddings/QWEN-omni"
     ]
 
     # Dictionary to store all L1 similarity scores of the models
     models = {}
 
-
-#THIS IS THE ORIGINAL CODE I USED TO LOOP OVER AND LOAD THE MODELS
-    # --- Process the LLM model files ---
-    # for base_dir in base_dirs:
-    #     for file in os.listdir(base_dir):
-    #         if file.endswith((".txt", ".1D")):
-    #             file_path = os.path.join(base_dir, file)
-    #             print(f"Processing: {file_path}")
-
-    #             try:
-    #                 data = tools.load_and_split_trimmed(file_path, run_start_indices)
-    #                 model_label = os.path.splitext(file)[0]
-    #                 models[model_label] = data
-    #                 print(f"Loaded: {model_label}")
-    #             except Exception as e:
-    #                 print(f"Error loading {file_path}: {e}")
-
-
-#THIS IS THE NEW CODE I AM USING THE LOAD THE MODELS, WHICH NOW INCLUDED A SECOND EXCEPTION AND USES THE READ_MODEL FUNCTION ANDREA SENT
     for base_dir in base_dirs:
         for file in os.listdir(base_dir):
             if file.endswith((".txt", ".1D")):
@@ -94,23 +71,23 @@ def main():
                 models[model_label] = data
 
 
-    models["binder_abstractness"] = tools.load_and_split_trimmed(
-        "data/semantic models/binder-abstractness-contextualized_conv.1D",
-        run_start_indices
-    )
+    # models["binder_abstractness"] = tools.load_and_split_trimmed(
+    #     "data/semantic models/binder-abstractness-contextualized_conv.1D",
+    #     run_start_indices
+    # )
 
-    models["binder_concreteness"] = tools.load_and_split_trimmed(
-        "data/semantic models/binder-concreteness-contextualized_conv.1D",
-        run_start_indices
-    )
+    # models["binder_concreteness"] = tools.load_and_split_trimmed(
+    #     "data/semantic models/binder-concreteness-contextualized_conv.1D",
+    #     run_start_indices
+    # )
 
-    models["word2vec"] = tools.load_and_split_trimmed(
-        "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
-        run_start_indices
-    )
+    # models["word2vec"] = tools.load_and_split_trimmed(
+    #     "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
+    #     run_start_indices
+    # )
 
     #path to where the results are stored
-    storing_results = "results/december"
+    storing_results = "results/january/qwen-omni"
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 
