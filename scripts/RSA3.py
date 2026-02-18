@@ -17,7 +17,7 @@ def main():
 
     for base_dir in directory:
         for file in os.listdir(base_dir):
-            if file.endswith(".txt") and ("embedding+" in file or "layers" in file):
+            if file.endswith((".txt", ".1D")):
                 file_path = os.path.join(base_dir, file)
                 print(f"Processing: {file_path}")
 
@@ -31,12 +31,12 @@ def main():
 
     try:
         models["binder_abstractness"] = thirdRSA.load_and_split_trimmed(
-            "data/semantic models/binder_abstractness_conv.1D",
+            "data/semantic models/binder-abstractness-contextualized_conv.1D",
             run_start_indices
         )
 
         models["binder_concreteness"] = thirdRSA.load_and_split_trimmed(
-            "data/semantic models/binder_concreteness_conv.1D",
+            "data/semantic models/binder-concreteness-contextualized_conv.1D",
             run_start_indices
         )
 
@@ -55,7 +55,7 @@ def main():
     foundationmodel_keys = [
         os.path.splitext(f)[0]
         for f in os.listdir(directory[0])
-        if f.endswith(".txt")
+        if f.endswith((".txt", ".1D"))
     ]
 
     print(foundationmodel_keys)
@@ -64,7 +64,7 @@ def main():
 
     surprisal = thirdRSA.load_and_split_trimmed("data/lowlevel models/convolved_surprisal", run_start_indices)
 
-    thirdRSA.compute_model_to_model_similarities_timewise_RSA(stimuli_models, foundationmodel_models, surprisal, res=True, save_path = "results/semantic/results_semantic.pkl")
+    thirdRSA.compute_model_to_model_similarities_timewise_RSA(stimuli_models, foundationmodel_models, surprisal, res=True, save_path = "results/january/semantic/results_semantic.pkl")
 
 
 if __name__ == "__main__":

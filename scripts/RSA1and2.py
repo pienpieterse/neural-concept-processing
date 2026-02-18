@@ -42,7 +42,7 @@ def main():
     run_start_indices =[0, 267, 492, 812, 1137, 1373]
 
     base_dirs = [
-    "data/LLM embeddings/QWEN-omni"
+    "data/LLM embeddings/other used LLM embeddings"
     ]
 
     # Dictionary to store all L1 similarity scores of the models
@@ -71,23 +71,25 @@ def main():
                 models[model_label] = data
 
 
-    # models["binder_abstractness"] = tools.load_and_split_trimmed(
-    #     "data/semantic models/binder-abstractness-contextualized_conv.1D",
-    #     run_start_indices
-    # )
+    models["binder_abstractness"] = tools.load_and_split_trimmed(
+        "data/semantic models/binder-abstractness-contextualized_conv.1D",
+        run_start_indices
+    )
 
-    # models["binder_concreteness"] = tools.load_and_split_trimmed(
-    #     "data/semantic models/binder-concreteness-contextualized_conv.1D",
-    #     run_start_indices
-    # )
+    models["binder_concreteness"] = tools.load_and_split_trimmed(
+        "data/semantic models/binder-concreteness-contextualized_conv.1D",
+        run_start_indices
+    )
 
-    # models["word2vec"] = tools.load_and_split_trimmed(
-    #     "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
-    #     run_start_indices
-    # )
+    models["word2vec"] = tools.load_and_split_trimmed(
+        "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
+        run_start_indices
+    )
+
 
     #path to where the results are stored
-    storing_results = "results/january/qwen-omni"
+    storing_results = "results/january/other" \
+    ""
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
 
