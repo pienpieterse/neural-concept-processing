@@ -15,19 +15,24 @@ def main():
 
     models = {}
 
-    for base_dir in directory:
-        for file in os.listdir(base_dir):
-            if file.endswith((".txt", ".1D")):
-                file_path = os.path.join(base_dir, file)
-                print(f"Processing: {file_path}")
+    # for base_dir in directory:
+    #     for file in os.listdir(base_dir):
+    #         if file.endswith((".txt", ".1D")):
+    #             file_path = os.path.join(base_dir, file)
+    #             print(f"Processing: {file_path}")
 
-                try:
-                    data = thirdRSA.load_and_split_trimmed(file_path, run_start_indices)
-                    model_label = os.path.splitext(file)[0]
-                    models[model_label] = data
-                    print(f"Loaded: {model_label}")
-                except Exception as e:
-                    print(f"Error loading {file_path}: {e}")
+    #             try:
+    #                 data = thirdRSA.load_and_split_trimmed(file_path, run_start_indices)
+    #                 model_label = os.path.splitext(file)[0]
+    #                 models[model_label] = data
+    #                 print(f"Loaded: {model_label}")
+    #             except Exception as e:
+    #                 print(f"Error loading {file_path}: {e}")
+
+    models["fast_text_grounded"] = thirdRSA.load_and_split_trimmed(
+    "data/LLM embeddings/all LLM embeddings/Fasttext/fasttext-grounded_conv.1D",
+    run_start_indices
+    )
 
     try:
         models["binder_abstractness"] = thirdRSA.load_and_split_trimmed(
@@ -52,11 +57,12 @@ def main():
 
     stimuli_models = {key: models[key] for key in stimuli_keys}
 
-    foundationmodel_keys = [
-        os.path.splitext(f)[0]
-        for f in os.listdir(directory[0])
-        if f.endswith((".txt", ".1D"))
-    ]
+    # foundationmodel_keys = [
+    #     os.path.splitext(f)[0]
+    #     for f in os.listdir(directory[0])
+    #     if f.endswith((".txt", ".1D"))
+    # ]
+    foundationmodel_keys = ['fast_text_grounded']
 
     print(foundationmodel_keys)
 
@@ -64,7 +70,7 @@ def main():
 
     surprisal = thirdRSA.load_and_split_trimmed("data/lowlevel models/convolved_surprisal", run_start_indices)
 
-    thirdRSA.compute_model_to_model_similarities_timewise_RSA(stimuli_models, foundationmodel_models, surprisal, res=True, save_path = "results/january/semantic/results_semantic.pkl")
+    thirdRSA.compute_model_to_model_similarities_timewise_RSA(stimuli_models, foundationmodel_models, surprisal, res=True, save_path = "results/january/groundft/results_semantic.pkl")
 
 
 if __name__ == "__main__":

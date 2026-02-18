@@ -41,54 +41,44 @@ def main():
 
     run_start_indices =[0, 267, 492, 812, 1137, 1373]
 
-    base_dirs = [
-    "data/LLM embeddings/other used LLM embeddings"
-    ]
+    # base_dirs = [
+    # "data/LLM embeddings/other used LLM embeddings"
+    # ]
 
     # Dictionary to store all L1 similarity scores of the models
     models = {}
 
-    for base_dir in base_dirs:
-        for file in os.listdir(base_dir):
-            if file.endswith((".txt", ".1D")):
-                file_path = os.path.join(base_dir, file)
-                model_label = os.path.splitext(file)[0]
+    # for base_dir in base_dirs:
+    #     for file in os.listdir(base_dir):
+    #         if file.endswith((".txt", ".1D")):
+    #             file_path = os.path.join(base_dir, file)
+    #             model_label = os.path.splitext(file)[0]
 
-                print(f"Processing: {file_path}")
+    #             print(f"Processing: {file_path}")
 
-                try:
-                    data = tools.load_and_split_trimmed(file_path, run_start_indices)
-                    print(f"Loaded with load_and_split_trimmed: {model_label}")
-                except Exception as e1:
-                    print(f"Primary loader failed for {model_label}: {type(e1).__name__}")
-                    try:
-                        data = tools.read_model(file_path)
-                        print(f"Loaded with read_model: {model_label}")
-                    except Exception as e2:
-                        print(f"Fallback loader also failed for {model_label}: {type(e2).__name__}")
-                        continue  # skip this file entirely
+    #             try:
+    #                 data = tools.load_and_split_trimmed(file_path, run_start_indices)
+    #                 print(f"Loaded with load_and_split_trimmed: {model_label}")
+    #             except Exception as e1:
+    #                 print(f"Primary loader failed for {model_label}: {type(e1).__name__}")
+    #                 try:
+    #                     data = tools.read_model(file_path)
+    #                     print(f"Loaded with read_model: {model_label}")
+    #                 except Exception as e2:
+    #                     print(f"Fallback loader also failed for {model_label}: {type(e2).__name__}")
+    #                     continue  # skip this file entirely
 
-                models[model_label] = data
+    #             models[model_label] = data
 
 
-    models["binder_abstractness"] = tools.load_and_split_trimmed(
-        "data/semantic models/binder-abstractness-contextualized_conv.1D",
-        run_start_indices
-    )
-
-    models["binder_concreteness"] = tools.load_and_split_trimmed(
-        "data/semantic models/binder-concreteness-contextualized_conv.1D",
-        run_start_indices
-    )
-
-    models["word2vec"] = tools.load_and_split_trimmed(
-        "data/lowlevel models/Original setti models/highlevel_word2vec_72pcs_conv.1D",
+    models["fast_text_grounded"] = tools.load_and_split_trimmed(
+        "data/LLM embeddings/all LLM embeddings/Fasttext/fasttext-grounded_conv.1D",
         run_start_indices
     )
 
 
     #path to where the results are stored
-    storing_results = "results/january/other" \
+    storing_results = "results/january/groundft" \
     ""
 
     RSA.RSA_fmri(groups, roi_masks, models, storing_results, recompute_model_correlations=True)
