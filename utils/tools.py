@@ -15,6 +15,9 @@ import os
 import pickle
 from scipy.stats import spearmanr
 
+from scipy.stats import spearmanr
+import numpy as np
+
 def cross_validated_residualize(fmri_list, confound_list):
     """
     Residualizes each run using confound model trained on other runs.
@@ -207,23 +210,6 @@ def load_and_split_trimmed(path_or_array, run_start_indices, trim_start=3, trim_
     trimmed_runs = [runs[0][trim_start + 1 : -trim_end]] + [r[trim_start:-trim_end] for r in runs[1:]]
     return trimmed_runs
 
-
-# def first_order_similarity(fmri):
-#     """
-#     Compute upper-triangle similarity of fMRI data (timepoints x voxels)
-#     using Spearman correlation.
-    
-#     Returns flattened upper-triangle vector (length T*(T-1)/2)
-#     """
-#     T = fmri.shape[0]
-#     sim_vector = []
-#     for t1 in range(T):
-#         for t2 in range(t1 + 1, T):
-#             corr = spearmanr(fmri[t1, :], fmri[t2, :]).correlation
-#             sim_vector.append(corr)
-#     return np.array(sim_vector)
-
-
 def model_correlations(models, storing_results="results", recompute=False):
     """
     Compute or load first-order similarity matrices for each model and run.
@@ -260,24 +246,6 @@ def model_correlations(models, storing_results="results", recompute=False):
 
         return model_corrs
 
-# def compute_per_timepoint_rsa(fmri_corr_vec, model_corr_vec, T):
-#     """
-#     Compute second-order RSA per timepoint.
-    
-#     fmri_corr_vec and model_corr_vec are flattened upper-triangle vectors
-#     of shape (T*(T-1)/2,)
-#     """
-#     timepoint_corrs = np.zeros(T)
-#     # Precompute the indices of upper-triangle for each timepoint
-#     pair_idx = np.triu_indices(T, k=1)
-#     for t in range(T):
-#         # Select pairs involving timepoint t
-#         mask = (pair_idx[0] == t) | (pair_idx[1] == t)
-#         timepoint_corrs[t] = spearmanr(fmri_corr_vec[mask], model_corr_vec[mask]).correlation
-#     return timepoint_corrs
-
-from scipy.stats import spearmanr
-import numpy as np
 
 def first_order_similarity(arr):
     """
@@ -366,15 +334,3 @@ def read_model(filepath):
         vecs = np.array(vecs, dtype=np.float64)
         assert line.shape == (1614, 2048)
     return vecs
-
-# def read_model(filepath):
-#     with open(filepath) as f:
-#         vecs = []
-#         for l in f:
-#             vecs.append(l.strip().split('\t'))
-
-#     vecs = np.array(vecs, dtype=np.float64)
-
-#     assert vecs.shape == (1614, 2048), f"Unexpected shape: {vecs.shape}"
-
-#     return vecs
